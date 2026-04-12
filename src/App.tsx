@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import AddPaymentMethodResult from './components/addPaymentMethodResult'
+import HostedCheckout from './components/hostedCheckout'
 import InvoiceDetail from './components/invoice/detail'
 import InvoiceList from './components/invoice/list'
 import Login from './components/login'
@@ -60,6 +61,10 @@ const App: React.FC = () => {
               path={`${APP_PATH}session-result`}
               Component={SessionResult}
             />
+            <Route
+              path={`${APP_PATH}hosted/checkout`}
+              Component={HostedCheckout}
+            />
           </Routes>
         </Layout>
       ) : (
@@ -106,6 +111,10 @@ const App: React.FC = () => {
                   <Route
                     path={`${APP_PATH}session-result`}
                     Component={SessionResult}
+                  />
+                  <Route
+                    path={`${APP_PATH}hosted/checkout`}
+                    Component={HostedCheckout}
                   />
                   <Route
                     path={`${APP_PATH}my-account`}

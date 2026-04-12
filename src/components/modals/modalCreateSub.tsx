@@ -80,9 +80,14 @@ const Index = ({
 
   const subscriptionId = useRef('') // for wire transfer, we need this Id(after creating sub) to mark transfer as complete
 
-  // set card payment as default gateway
+  const preferredGatewayId =
+    appConfig.gateway.find((g) => g.gatewayName == 'chapa')?.gatewayId ??
+    appConfig.gateway.find((g) => g.gatewayName == 'stripe')?.gatewayId ??
+    appConfig.gateway.find((g) => g.gatewayName != 'wire_transfer')?.gatewayId ??
+    appConfig.gateway[0]?.gatewayId
+
   const [gatewayId, setGatewayId] = useState<undefined | number>(
-    appConfig.gateway.find((g) => g.gatewayName == 'stripe')?.gatewayId
+    preferredGatewayId
   )
   const onGatewayChange = (gatewayId: number) => setGatewayId(gatewayId)
   const [gatewayPaymentType, setGatewayPaymentType] = useState<
@@ -403,6 +408,12 @@ const Index = ({
   useEffect(() => {
     createPreview()
   }, [selectedCountry, gatewayId, gatewayPaymentType])
+
+  useEffect(() => {
+    if (gatewayId == null && preferredGatewayId != null) {
+      setGatewayId(preferredGatewayId)
+    }
+  }, [gatewayId, preferredGatewayId])
 
   return (
     <Modal

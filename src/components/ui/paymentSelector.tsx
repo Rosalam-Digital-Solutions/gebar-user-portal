@@ -4,6 +4,14 @@ import { CheckOutlined } from '@ant-design/icons'
 import { Divider } from 'antd'
 import React, { ChangeEventHandler, useEffect } from 'react'
 
+const formatGatewayName = (name: string): string => {
+  return name
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
 const Index = ({
   selected,
   selectedPaymentType,
@@ -18,7 +26,7 @@ const Index = ({
   disabled?: boolean
 }) => {
   const appConfig = useAppConfigStore()
-  const gateways = appConfig.gateway.sort(
+  const gateways = [...appConfig.gateway].sort(
     (a: TGateway, b: TGateway) => a.sort - b.sort
   )
 
@@ -57,56 +65,74 @@ const Index = ({
           gatewayId,
           gatewayName,
           displayName,
+          gatewayLogo,
           gatewayIcons,
           gatewayPaymentTypes
-        }) => (
-          <div
-            key={gatewayId}
-            className={`rounded border border-solid ${selected == gatewayId ? 'border-blue-500' : 'border-gray-200'}`}
-          >
-            <label
-              onClick={onLabelClick}
-              // key={gatewayId}
-              htmlFor={`payment-${gatewayName}`}
-              className={`flex h-12 w-full shrink-0 grow-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} items-center justify-between px-2`}
+        }) => {
+          const gatewayTitle =
+            displayName?.trim()?.length > 0
+              ? displayName
+              : formatGatewayName(gatewayName)
+          const icons =
+            gatewayIcons != null && gatewayIcons.length > 0
+              ? gatewayIcons
+              : gatewayLogo
+                ? [gatewayLogo]
+                : []
+
+          return (
+            <div
+              key={`${gatewayName}-${gatewayId}`}
+              className={`rounded border border-solid ${selected == gatewayId ? 'border-blue-500' : 'border-gray-200'}`}
             >
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  name={`payment-${gatewayName}`}
-                  id={`payment-${gatewayName}`}
-                  value={gatewayId}
-                  checked={gatewayId === selected}
-                  onChange={onChange}
-                  disabled={disabled}
-                />
-                <div className="ml-2 flex items-center justify-between">
-                  {displayName}
-                </div>
-              </div>
-              <div className="ml-3 flex items-center justify-end gap-2">
-                {gatewayIcons.map((i) => (
-                  <div
-                    key={i}
-                    className="flex h-7 max-w-14 items-center justify-center"
-                  >
-                    <img src={i} className="h-full w-full object-contain" />
+              <label
+                onClick={onLabelClick}
+                // key={gatewayId}
+                htmlFor={`payment-${gatewayName}`}
+                className={`flex h-12 w-full shrink-0 grow-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} items-center justify-between px-2`}
+              >
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`payment-${gatewayName}`}
+                    id={`payment-${gatewayName}`}
+                    value={gatewayId}
+                    checked={gatewayId === selected}
+                    onChange={onChange}
+                    disabled={disabled}
+                  />
+                  <div className="ml-2 flex items-center justify-between">
+                    {gatewayTitle}
                   </div>
-                ))}
-              </div>
-            </label>
-            {gatewayPaymentTypes != null && gatewayPaymentTypes.length > 0 && (
-              <PaymentTypesSelector
-                gatewayId={gatewayId}
-                selected={selected}
-                selectedPaymentType={selectedPaymentType}
-                onSelect={onSelect}
-                onSelectPaymentType={onSelectPaymentType}
-                list={gatewayPaymentTypes}
-              />
-            )}
-          </div>
-        )
+                </div>
+                <div className="ml-3 flex items-center justify-end gap-2">
+                  {icons.map((i) => (
+                    <div
+                      key={i}
+                      className="flex h-7 max-w-14 items-center justify-center"
+                    >
+                      <img
+                        src={i}
+                        alt={gatewayTitle}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </label>
+              {gatewayPaymentTypes != null && gatewayPaymentTypes.length > 0 && (
+                <PaymentTypesSelector
+                  gatewayId={gatewayId}
+                  selected={selected}
+                  selectedPaymentType={selectedPaymentType}
+                  onSelect={onSelect}
+                  onSelectPaymentType={onSelectPaymentType}
+                  list={gatewayPaymentTypes}
+                />
+              )}
+            </div>
+          )
+        }
       )}
     </div>
   )

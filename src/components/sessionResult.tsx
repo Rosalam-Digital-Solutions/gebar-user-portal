@@ -21,6 +21,7 @@ export default function SessionResult() {
   const navigate = useNavigate()
   const [loginStatus] = useState<number | null>(null)
   const session = searchParams.get('session')
+  const redirectTarget = searchParams.get('redirect')
 
   const checking = async () => {
     const [res, err] = await checkSessionReq(session as string)
@@ -43,7 +44,7 @@ export default function SessionResult() {
     appConfigStore.setAppConfig(appConfig)
     appConfigStore.setGateway(gateways)
     merchantStore.setMerchantInfo(merchantInfo)
-    navigate(`${APP_PATH}my-subscription`, {
+    navigate(redirectTarget || `${APP_PATH}my-subscription`, {
       state: { from: 'login' }
     })
   }

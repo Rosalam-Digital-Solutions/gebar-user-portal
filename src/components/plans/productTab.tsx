@@ -7,14 +7,33 @@ import { useSearchParams } from 'react-router-dom'
 import MainPlanList from './mainPlanList'
 
 const Index = ({ productList }: { productList: IProduct[] }) => {
+  const getDefaultProductId = (products: IProduct[]) => {
+    const firstRealProduct = products.find((product) => product.id !== 0)
+    return (firstRealProduct ?? products[0])?.id?.toString() ?? '0'
+  }
+
   const [searchParams, setSearchParams] = useSearchParams()
+  const targetPlanId = Number(searchParams.get('planId') ?? '0') || undefined
+  const autoOpen = searchParams.get('autoOpen') === '1'
   // const [productList, setProductList] = useState<IProduct[]>([])
   const [loading, setLoading] = useState(false)
   // const appConfigStore = useAppConfigStore();
   const [productId, setProductId] = useState(
-    searchParams.get('productId') ?? '0'
+    searchParams.get('productId') ?? getDefaultProductId(productList)
   ) // set default tab
   const [subList, setSubList] = useState<ISubscription[]>([])
+
+  const updateQuery = (updates: Record<string, string | undefined>) => {
+    const next = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value == null || value === '') {
+        next.delete(key)
+      } else {
+        next.set(key, value)
+      }
+    })
+    setSearchParams(next)
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -41,12 +60,29 @@ const Index = ({ productList }: { productList: IProduct[] }) => {
 
   const onTabChange = (newActiveKey: string) => {
     setProductId(newActiveKey)
-    setSearchParams({ productId: newActiveKey })
+    updateQuery({ productId: newActiveKey })
+  }
+
+  const activateProductTab = (newProductId: number) => {
+    const nextProductId = newProductId.toString()
+    if (productId === nextProductId) {
+      return
+    }
+    setProductId(nextProductId)
+    updateQuery({ productId: nextProductId })
   }
 
   useEffect(() => {
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (productList.length > 0 && (productId === '0' || productId === '')) {
+      const nextProductId = getDefaultProductId(productList)
+      setProductId(nextProductId)
+      updateQuery({ productId: nextProductId })
+    }
+  }, [productId, productList])
 
   return (
     <div>
@@ -63,6 +99,10 @@ const Index = ({ productList }: { productList: IProduct[] }) => {
               <MainPlanList
                 productId={p.id}
                 activeSub={subList.find((s) => s.productId == p.id)}
+                targetPlanId={targetPlanId}
+                autoOpen={autoOpen}
+                isActiveProduct={productId === p.id.toString()}
+                activateProductTab={activateProductTab}
               />
             ),
             icon:

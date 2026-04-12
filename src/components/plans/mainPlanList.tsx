@@ -28,7 +28,7 @@ import {
 } from 'antd'
 import { Currency } from 'dinero.js'
 import update from 'immutability-helper'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import OTPBuyListModal from '../modals/addonBuyListModal'
 import BillingAddressModal from '../modals/billingAddressModal'
 import CancelSubModal from '../modals/modalCancelPendingSub'
@@ -46,10 +46,18 @@ type DiscountCodePreview = {
 
 const Index = ({
   productId,
-  activeSub
+  activeSub,
+  targetPlanId,
+  autoOpen,
+  isActiveProduct,
+  activateProductTab
 }: {
   productId: number
   activeSub: ISubscription | undefined
+  targetPlanId?: number
+  autoOpen?: boolean
+  isActiveProduct?: boolean
+  activateProductTab?: (productId: number) => void
 }) => {
   const appConfigStore = useAppConfigStore()
   const profileStore = useProfileStore()
@@ -93,6 +101,7 @@ const Index = ({
 
   const [buyRecordModalOpen, setBuyRecordModalOpen] = useState(false)
   const toggleBuyRecordModal = () => setBuyRecordModalOpen(!buyRecordModalOpen)
+  const autoOpenedRef = useRef(false)
 
   const toggleCreateModal = () => setCreateModalOpen(!createModalOpen) // Modal for first time plan choosing
   const toggleUpdateModal = () => setUpdateModalOpen(!updateModalOpen) // Modal for update plan
@@ -311,7 +320,16 @@ const Index = ({
     }
 
     // main plans
-    setPlans(localPlans.filter((p) => p.type == 1))
+    const mainPlans = localPlans.filter((p) => p.type == 1)
+    setPlans(mainPlans)
+
+    if (
+      targetPlanId != null &&
+      mainPlans.some((plan) => plan.id === targetPlanId) &&
+      activateProductTab != null
+    ) {
+      activateProductTab(productId)
+    }
   }
 
   const upgradeCheck = () => {
@@ -403,6 +421,32 @@ const Index = ({
     fetchData()
     fetchCountry()
   }, [])
+
+  useEffect(() => {
+    if (
+      autoOpenedRef.current ||
+      !autoOpen ||
+      !isActiveProduct ||
+      targetPlanId == null ||
+      !plans.some((plan) => plan.id === targetPlanId)
+    ) {
+      return
+    }
+
+    autoOpenedRef.current = true
+    setSelectedPlan(targetPlanId)
+
+    if (profileStore.countryCode == '' || profileStore.countryCode == null) {
+      toggleBillingModal()
+      return
+    }
+
+    if (activeSub == null) {
+      toggleCreateModal()
+    } else {
+      toggleUpdateModal()
+    }
+  }, [activeSub, autoOpen, isActiveProduct, plans, profileStore.countryCode, targetPlanId])
 
   return (
     <div>

@@ -544,6 +544,99 @@ interface IPreview {
   nextPeriodInvoice?: InvoiceItemTotal // same as above invoice obj, only optional, used when downgrading.
 }
 
+export interface PricingPlanCard {
+  id: number
+  productId: number
+  productName: string
+  name: string
+  description: string
+  amount: number
+  currency: string
+  intervalCount: number
+  intervalUnit: 'day' | 'week' | 'month' | 'year'
+  trialDays: number
+  badge?: string
+  isRecommended?: boolean
+  features: string[]
+}
+
+export interface CheckoutSummaryLine {
+  label: string
+  value: number
+  currency: string
+  tone?: 'default' | 'positive' | 'muted'
+}
+
+export interface CheckoutSummary {
+  currency: string
+  subtotal: number
+  discount: number
+  tax: number
+  totalDueNow: number
+  nextBillingAmount: number
+  nextBillingDate?: string
+  cadenceLabel: string
+  trialLabel?: string
+  lines: CheckoutSummaryLine[]
+}
+
+export interface CheckoutSession {
+  id: string
+  planId: number
+  productId: number
+  planName: string
+  productName: string
+  currency: string
+  amount: number
+  cadenceLabel: string
+  trialDays: number
+  customerEmail?: string
+  companyName?: string
+  billingCountryCode?: string
+  vatNumber?: string
+  discountCode?: string
+  gatewayId?: number
+  gatewayPaymentType?: string
+}
+
+export interface PaymentState {
+  status: 'success' | 'failure' | 'pending'
+  title: string
+  description: string
+  amount?: number
+  currency?: string
+  nextBillingDate?: string
+  actionLabel?: string
+  actionHref?: string
+}
+
+export interface InvoicePaymentState {
+  invoiceId: string
+  amountDue: number
+  currency: string
+  status: 'paid' | 'due' | 'overdue' | 'partial'
+  dueDate?: string
+  issueDate?: string
+}
+
+export interface PlanChangePreview {
+  currentPlanName: string
+  nextPlanName: string
+  currency: string
+  currentAmount: number
+  nextAmount: number
+  proratedAmount: number
+  effectiveDate?: string
+}
+
+export interface CancellationPreview {
+  subscriptionId: string
+  planName: string
+  endDate?: string
+  accessEndsAt?: string
+  reason?: string
+}
+
 export class ExpiredError extends Error {
   constructor(m: string) {
     super(m)
@@ -563,14 +656,6 @@ export type {
   IProfile,
   ISubHistoryItem,
   ISubscription,
-  PaymentState,
-  PricingPlanCard,
-  CheckoutSession,
-  CheckoutSummary,
-  CheckoutSummaryLine,
-  InvoicePaymentState,
-  PlanChangePreview,
-  CancellationPreview,
   PaymentItem,
   TMerchantInfo,
   TRefund,

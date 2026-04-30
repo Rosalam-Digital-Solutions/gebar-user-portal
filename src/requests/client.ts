@@ -28,4 +28,20 @@ request.interceptors.response.use(
   }
 )
 
-export { request }
+const exchangeSessionForToken = async () => {
+  const session = new URLSearchParams(window.location.search).get('session')
+  if (!session) {
+    throw new Error('Missing session')
+  }
+
+  const res = await request.post('/user/auth/session_login', { session })
+  const token = res.data?.data?.token
+  if (!token) {
+    throw new Error('Missing token')
+  }
+
+  localStorage.setItem('token', token)
+  return token as string
+}
+
+export { exchangeSessionForToken, request }

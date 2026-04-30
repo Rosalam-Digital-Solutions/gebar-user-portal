@@ -90,7 +90,7 @@ export function OrderSummaryCard({
           <Tag color="blue">{summary.cadenceLabel}</Tag>
         </div>
         <div className="billing-summary-lines">
-          {summary.lines.map((line) => (
+          {summary.lines.map((line: CheckoutSummary['lines'][number]) => (
             <div className="billing-summary-line" key={line.label}>
               <span>{line.label}</span>
               <strong>{formatMoney(line.value, line.currency)}</strong>

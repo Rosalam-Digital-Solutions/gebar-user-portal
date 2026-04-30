@@ -41,7 +41,7 @@ export function formatMoney(amount: number, currency: string) {
   }
 }
 
-export function formatCadence(plan: Pick<IPlan, 'intervalCount' | 'intervalUnit' | 'trialDurationTime'>) {
+export function formatCadence(plan: { intervalCount: number; intervalUnit: 'day' | 'week' | 'month' | 'year' }) {
   const interval = plan.intervalCount > 1 ? `${plan.intervalCount} ${plan.intervalUnit}s` : plan.intervalUnit
   return `Billed every ${interval}`
 }
@@ -108,9 +108,9 @@ export function readCheckoutSession(): CheckoutSession | null {
 }
 
 export function previewToSummary(preview: IPreview | null, session: CheckoutSession): CheckoutSummary {
-  const subtotal = preview?.subscriptionAmount ?? session.amount
+  const subtotal = preview?.originAmount ?? session.amount
   const discount = preview?.discountAmount ?? 0
-  const tax = preview?.taxAmount ?? 0
+  const tax = preview ? Math.max(0, preview.totalAmount - subtotal + discount) : 0
   const totalDueNow = preview?.totalAmount ?? subtotal - discount + tax
   const nextBillingAmount = preview?.nextPeriodInvoice?.totalAmount ?? subtotal
 
@@ -128,7 +128,7 @@ export function previewToSummary(preview: IPreview | null, session: CheckoutSess
     tax,
     totalDueNow,
     nextBillingAmount,
-    nextBillingDate: preview?.nextPeriodInvoice ? new Date(preview.nextPeriodInvoice.periodEnd * 1000).toLocaleDateString() : undefined,
+    nextBillingDate: undefined,
     cadenceLabel: session.cadenceLabel,
     trialLabel: session.trialDays > 0 ? `${session.trialDays} day trial` : undefined,
     lines

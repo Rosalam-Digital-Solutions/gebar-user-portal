@@ -531,6 +531,7 @@ type TCreateSubscriptionReq = {
   discountCode?: string
   applyPromoCredit?: boolean
   applyPromoCreditAmount?: number
+  returnUrl?: string
 }
 export const createSubscriptionReq = async ({
   planId,
@@ -975,3 +976,5 @@ export const getProductsWithMoreReq = async (refreshCb: () => void) => {
   }
   return [{ products, subscriptions }, null]
 }
+
+export { exchangeSessionForToken } from './client'
